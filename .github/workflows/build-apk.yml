@@ -1,0 +1,51 @@
+name: Gerar APK Taxas Offline
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Baixar arquivos do repositório
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Configurar Java 21
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Criar projeto Capacitor e compilar APK
+        run: |
+          npm init -y
+          npm install @capacitor/core @capacitor/cli @capacitor/android
+          npx cap init "Taxas IDNARI & JMF" "com.idnarijmf.taxas" --web-dir www
+          npx cap add android
+          npx cap sync android
+          python3 -c '
+          p = "android/app/src/main/AndroidManifest.xml"
+          s = open(p).read()
+          q = """    <queries>
+              <package android:name="com.whatsapp" />
+              <package android:name="com.whatsapp.w4b" />
+            </queries>
+          </manifest>"""
+          if "<queries>" not in s and "</manifest>" in s:
+              open(p, "w").write(s.replace("</manifest>", q, 1))
+          '
+          cd android && ./gradlew assembleDebug --no-daemon
+
+      - name: Salvar APK para download
+        uses: actions/upload-artifact@v4
+        with:
+          name: Calculadora-Taxas-IDNARI-JMF
+          path: android/app/build/outputs/apk/debug/app-debug.apk
