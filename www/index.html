@@ -3,6 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#1e293b">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <link rel="manifest" href="./manifest.json">
     <title>Calculadora de Taxas - IDNARI & JMF</title>
     <style>
         * {
@@ -696,7 +700,11 @@
 
         function compartilharWhatsApp() {
             const mensagemCodificada = encodeURIComponent(gerarMensagemCliente());
-            window.location.href = `https://wa.me/?text=${mensagemCodificada}`;
+            const isDesktop = window.matchMedia('(min-width: 768px)').matches && !/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+            const url = isDesktop
+                ? `https://web.whatsapp.com/send?text=${mensagemCodificada}`
+                : `https://wa.me/?text=${mensagemCodificada}`;
+            window.open(url, '_blank', 'noopener,noreferrer');
         }
 
         function copiarResumo() {
@@ -738,6 +746,10 @@
             atualizarOpcoesParcelas();
             atualizarParcelas();
             selecionarCategoria('jmf');
+
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('./sw.js').catch(() => {});
+            }
         });
     </script>
 </body>
