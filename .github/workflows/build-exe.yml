@@ -20,6 +20,7 @@ jobs:
 
       - name: Configurar projeto Electron e gerar instalador EXE
         run: |
+          npm init -y
           npm pkg set name="calculadora-taxas-idnari-jmf"
           npm pkg set version="1.0.0"
           npm pkg set description="Calculadora de Taxas - IDNARI & JMF"
